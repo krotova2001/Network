@@ -50,11 +50,27 @@ namespace Server
         private void Send_otvet(Socket s_client)
         {
             byte[] buf = new byte[1024];
-            int l = s_client.Receive(buf);
-            string mess = Encoding.Default.GetString(buf, 0, l);
-            s_client.Send(Encoding.Default.GetBytes(DateTime.Now.ToString() + " " + mess));
-            s_client.Shutdown(SocketShutdown.Both);
-            s_client.Close();
+            try
+            {
+                int l = s_client.Receive(buf);
+                if(l > 0)
+                {
+                    string mess = Encoding.Default.GetString(buf, 0, l);
+                    s_client.Send(Encoding.Default.GetBytes(DateTime.Now.ToString() + " " + mess));
+                }
+                else
+                {
+                    s_client.Send(Encoding.Default.GetBytes(DateTime.Now.ToString()));
+                }
+                //s_client.Shutdown(SocketShutdown.Both);
+            }
+           catch (Exception e) { MessageBox.Show(e.Message); }
+           //finally { s_client.Close(); }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

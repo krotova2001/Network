@@ -37,14 +37,13 @@ namespace Network
                     lenth = socket.Receive(buffer);
                     data = Encoding.Default.GetString(buffer, 0, lenth);
                 }
-
-                socket.Shutdown(SocketShutdown.Both);
+                //socket.Shutdown(SocketShutdown.Both);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
-            finally { socket.Close(); }
+            //finally { socket.Close(); }
             richTextBox1.Text += data;
         }
 
