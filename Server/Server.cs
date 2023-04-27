@@ -91,11 +91,13 @@ namespace Server
                             Send_message(DateTime.Now.ToString());
                             break;
                         case "b":
+                            Send_message("Disconnected");
                             s_client.Close();
                             state = "sleep";
                             break;
+                        //проверка как эхо-бота
                         default:
-                            Send_message(data);
+                        //    Send_message(data);
                             break;
                     }
                 }
