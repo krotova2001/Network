@@ -30,27 +30,50 @@ namespace Network
             try
             {
                 socket.Connect(endPoint);
-                if (socket.Connected)
-                {
-                    byte[] buffer = new byte[4096];
-                    int lenth = 0;
-                    lenth = socket.Receive(buffer);
-                    data = Encoding.Default.GetString(buffer, 0, lenth);
-                }
-                //socket.Shutdown(SocketShutdown.Both);
+                //прослушивание сообщений
+                Task t = Task.Run(() => { Listening(); });
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
-            //finally { socket.Close(); }
-            richTextBox1.Text += data;
+           
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            String s = richTextBox1.Text;
-            socket.Send(Encoding.Default.GetBytes(s));
+            if (socket.Connected)
+            {
+                String s = richTextBox1.Text;
+                socket.Send(Encoding.Default.GetBytes(s));
+                richTextBox1.Clear();
+            }
         }
+
+        //Disconnect
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (socket.Connected)
+            {
+                socket.Close();
+            }
+        }
+
+        private void Listening()
+        {
+            while (true)
+            {
+                if (socket.Connected)
+                {
+                        byte[] buffer = new byte[4096];
+                        int lenth = 0;
+                        lenth = socket.Receive(buffer);
+                        data = Encoding.Default.GetString(buffer, 0, lenth);
+                        richTextBox1.Text += data;
+                        data = null;
+                }
+            }
+        }
+
     }
 }
