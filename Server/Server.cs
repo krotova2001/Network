@@ -65,6 +65,7 @@ namespace Server
                 byte[] buf = System.Text.Encoding.Default.GetBytes(message);
                 try
                 {
+                    
                     s_client.Send(buf, 0, buf.Length, SocketFlags.None);
                 }
                 catch (Exception) { }
@@ -97,7 +98,9 @@ namespace Server
                             break;
                         //проверка как эхо-бота
                         default:
-                        //    Send_message(data);
+                            Index_worker index = new Index_worker(data);
+                            string res = index.data;
+                            Send_message(res);
                             break;
                     }
                 }

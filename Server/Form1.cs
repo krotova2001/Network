@@ -54,5 +54,10 @@ namespace Server
             }
         }
 
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Index_worker index = new Index_worker("660021");
+            richTextBox2.Text += index.data;
+        }
     }
 }

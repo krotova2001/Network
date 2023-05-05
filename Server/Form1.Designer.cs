@@ -55,7 +55,6 @@
             this.richTextBox1.Size = new System.Drawing.Size(150, 96);
             this.richTextBox1.TabIndex = 1;
             this.richTextBox1.Text = "";
-           
             // 
             // textBox1
             // 
