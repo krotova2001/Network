@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
+using System.IO;
 
 namespace Server
 {
@@ -14,9 +15,9 @@ namespace Server
         IPAddress IPAddress;
         IPEndPoint endPoint;
         Socket socket;
-        Socket s_client;
-        public string data;
+        public string messages;
         public string state = "sleep"; // состояние работы сервера
+        public List<Client> clients;
 
         //в конструкторе по умолчанию сделаем общие действия для синхронной и асинхронной работы
         public Server()
@@ -24,21 +25,17 @@ namespace Server
             IPAddress = IPAddress.Parse("127.0.0.1");
             endPoint = new IPEndPoint(IPAddress, 777);
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            clients = new List<Client>();
         }
 
-        public Server(IPAddress iP, IPEndPoint iPEnd)
-        {
-            IPAddress = iP;
-            endPoint = iPEnd;
-        }
 
         //запуск сервера
         public void Start()
         {
-            Task task = Task.Run(() => { Connect(); });
+            Task task = Task.Run(() => { TurnOn(); });
         }
 
-        private void Connect ()
+        private void TurnOn()
         {
             try
             {
@@ -46,8 +43,8 @@ namespace Server
                 socket.Listen(10);
                 while (true)
                 {
-                    s_client = socket.Accept();
-                    Task task = Task.Run(() => { Send_message("Connection opened\n"); });
+                    Socket s_client = socket.Accept();
+                    Registration(s_client);
                     Task task2 = Task.Run(() => { Auto_otvet(); });
                     if (s_client != null)
                         state = "Working";
@@ -58,50 +55,54 @@ namespace Server
         }
 
         //послать сообщение об ответе
-        public void Send_message(string message)
-        {
-            if (s_client != null)
+        public void Registration(Socket s)
+        { 
             {
-                byte[] buf = System.Text.Encoding.Default.GetBytes(message);
                 try
                 {
-                    
-                    s_client.Send(buf, 0, buf.Length, SocketFlags.None);
+                    byte[] res = new byte[1024];
+                    NetworkStream sr = new NetworkStream(s);
+                    int l = sr.Read(res, 0, res.Length);
+                    if (res != null)
+                    {
+                        string name = Encoding.UTF8.GetString(res, 0, res.Length);
+                        clients.Add(new Client(name, s));
+                    }
                 }
                 catch (Exception) { }
             }
         }
 
-        //логика общения
+        public void Send_message_chat(string message, Client sender)
+        {
+            foreach (var client in clients)
+            {
+                byte[] buf = System.Text.Encoding.Default.GetBytes(message);
+                try
+                {
+                   // if (client != sender)
+                        client.socket.Send(buf, 0, buf.Length, SocketFlags.None);
+                }
+                catch (Exception) { }
+            }
+        }
+
         private void Auto_otvet()
         {
             while (true)
             {
-                if (s_client.Connected)
+                foreach (var client in clients)
                 {
-                    byte[] buffer = new byte[4096];
-                    int lenth = 0;
-                    lenth = s_client.Receive(buffer);
-                    data = Encoding.Default.GetString(buffer, 0, lenth);
-                }
-                if (data != null)
-                {
-                    switch (data)
                     {
-                        case "d":
-                            Send_message(DateTime.Now.ToString());
-                            break;
-                        case "b":
-                            Send_message("Disconnected");
-                            s_client.Close();
-                            state = "sleep";
-                            break;
-                        //проверка как эхо-бота
-                        default:
-                            Index_worker index = new Index_worker(data);
-                            string res = index.data;
-                            Send_message(res);
-                            break;
+                        NetworkStream sr = new NetworkStream(client.socket);
+                        byte[] buffer = new byte[1096];
+                        int lenth = sr.Read(buffer, 0, buffer.Length);
+                        if (buffer != null)
+                        {
+                            string message = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                            messages = message;
+                            Send_message_chat($"{client.Name} - {messages}", client);
+                        }
                     }
                 }
             }

@@ -33,7 +33,6 @@ namespace Server
         {
             if (s.state != "sleep")
             {
-                s.Send_message(richTextBox1.Text);
                 richTextBox1.Clear();
             }
         }
@@ -45,19 +44,13 @@ namespace Server
             {
                 if (s.state != "sleep")
                 {
-                    if (s.data != null)
+                    if (s.messages != null)
                     {
-                        richTextBox2.Text += s.data;
-                        s.data = null;
+                        richTextBox2.Text += s.messages;
+                        s.messages = null;
                     }
                 }
             }
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            Index_worker index = new Index_worker("660021");
-            richTextBox2.Text += index.data;
         }
     }
 }

@@ -65,12 +65,13 @@ namespace Network
             {
                 if (socket.Connected)
                 {
-                        byte[] buffer = new byte[4096];
-                        int lenth = 0;
-                        lenth = socket.Receive(buffer);
-                        data = Encoding.Default.GetString(buffer, 0, lenth);
-                        richTextBox1.Text += data;
-                        data = null;
+                    byte[] buffer = new byte[4096];
+                    int lenth = 0;
+                    lenth = socket.Receive(buffer);
+                    data = Encoding.Default.GetString(buffer, 0, lenth);
+                    richTextBox2.Text += data;
+                    richTextBox2.Text += "\n";
+                    data = null;
                 }
             }
         }
